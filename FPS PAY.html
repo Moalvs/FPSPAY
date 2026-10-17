@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1628">
+<meta name="format-detection" content="telephone=no">
+<style>[hidden]{display:none!important}img{max-width:100%}body{margin:0}</style>
+<title>FPS Pay Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column dispatch-board — rate grid on top, hours entry, then the paycheck stub. */
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --panel-2:#f5f7fb; --line:#d5dbe6;
+  --fg:#0d1a2e; --muted:#566377; --accent:#0f6fd6; --accent-soft:#dbe9fb;
+  --amber:#b86e00; --amber-soft:#fdf1dc; --good:#1c7c4a;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1628; --panel:#111f36; --panel-2:#0e1b30; --line:#22344f;
+  --fg:#e6edf7; --muted:#8fa0b8; --accent:#5fb4ff; --accent-soft:#16365c;
+  --amber:#f2b445; --amber-soft:#2e2611; --good:#5fd39a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1628; --panel:#111f36; --panel-2:#0e1b30; --line:#22344f;
+  --fg:#e6edf7; --muted:#8fa0b8; --accent:#5fb4ff; --accent-soft:#16365c;
+  --amber:#f2b445; --amber-soft:#2e2611; --good:#5fd39a; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;letter-spacing:.02em;line-height:1;margin:0;text-wrap:balance}
+.sub{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;padding:7px 12px;font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:600}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+section.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+h2{font-family:var(--display);font-weight:600;font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase;margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+h2 small{font-family:var(--mono);font-weight:400;font-size:.72rem;letter-spacing:.08em;color:var(--muted);text-transform:none}
+
+/* Rate grid */
+.grid-scroll{overflow-x:auto;margin-inline:-4px;padding-inline:4px}
+table.rates{border-collapse:separate;border-spacing:3px;width:100%;min-width:440px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rates th{font-size:.7rem;letter-spacing:.08em;color:var(--muted);font-weight:500;padding:4px 2px;text-align:center}
+.rates th.row{text-align:left;color:var(--fg);font-weight:600;padding-left:6px}
+.rates td{padding:0}
+.rates td button{width:100%;border:1px solid transparent;background:var(--panel-2);color:var(--fg);border-radius:5px;padding:7px 2px;font-family:var(--mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.rates td button:hover{border-color:var(--accent)}
+.rates td button.on{background:var(--accent);color:var(--bg);font-weight:600}
+.rates td button.near{background:var(--accent-soft)}
+.hint{font-size:.8rem;color:var(--muted);margin:0}
+
+/* Inputs */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.field .tag{font-family:var(--mono);font-size:.7rem;color:var(--amber)}
+input,select{font:inherit;font-family:var(--mono);font-variant-numeric:tabular-nums;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+input:focus,select:focus{border-color:var(--accent);outline:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--panel-2);color:var(--muted);padding:6px 12px;font-family:var(--mono);font-size:.75rem;letter-spacing:.06em}
+.seg button.on{background:var(--accent);color:var(--bg);font-weight:600}
+
+.check{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);cursor:pointer;font-size:.9rem}
+.check input{width:18px;height:18px;flex:none;accent-color:var(--accent)}
+.check b{font-weight:600}
+.builder{background:var(--amber-soft);border:1px dashed var(--amber);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.builder h3{margin:0;font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.builder .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;align-items:end}
+.split{font-family:var(--mono);font-size:.8rem;color:var(--fg);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
+.bar span{display:block;height:100%}
+.b0{background:var(--muted)} .b1{background:var(--accent)} .b2{background:var(--amber)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* Stub */
+.total{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.big{font-family:var(--display);font-weight:700;font-size:3rem;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.kpis{display:flex;gap:18px;flex-wrap:wrap}
+.kpi{display:flex;flex-direction:column}
+.kpi b{font-family:var(--mono);font-size:1rem;font-variant-numeric:tabular-nums;font-weight:600}
+.kpi span,.lbl{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stub-scroll{overflow-x:auto}
+table.stub{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:400px}
+.stub th{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:right;padding:6px 6px;border-bottom:1px solid var(--line)}
+.stub th:first-child,.stub td:first-child{text-align:left}
+.stub td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--mono);font-size:.85rem}
+.stub td:first-child{font-family:var(--body);font-size:.9rem}
+.stub tr.zero td{color:var(--muted)}
+.stub tfoot td{border-bottom:0;font-weight:600;font-size:.95rem;padding-top:10px}
+.note{font-size:.78rem;color:var(--muted);margin:0}
+.note b{color:var(--fg);font-weight:600}
+@media (prefers-reduced-motion:no-preference){.rates td button,.btn{transition:background .12s,border-color .12s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>FPS Pay Check</h1>
+      <div class="sub">Hourly minimum · Shift diff · OT estimator</div>
+    </div>
+    <button class="btn" id="reset" type="button">Reset</button>
+  </header>
+
+  <section class="card" aria-labelledby="h-rate">
+    <h2 id="h-rate">Base rate <small id="rate-label">YOS 1 · DOS</small></h2>
+    <div class="grid-scroll">
+      <table class="rates" id="rates"></table>
+    </div>
+    <p class="hint">Tap your years of service (row) and step (column). DOS +12 means 12 months after date of signing.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-hours">
+    <h2 id="h-hours">Hours this period <small>Biweekly · 80 hr salary</small></h2>
+
+    <div class="builder">
+      <h3>Shift builder · 10-hour shifts</h3>
+      <div class="row">
+        <div class="field"><label for="s-shift">Shift start</label>
+          <select id="s-shift">
+            <option value="05:00">0500 – 1500</option>
+            <option value="13:00">1300 – 2300</option>
+            <option value="21:00">2100 – 0700</option>
+          </select></div>
+        <div class="field"><label for="s-count">Shifts worked</label><input type="number" id="s-count" min="0" step="1" inputmode="numeric"></div>
+        <button class="btn primary" type="button" id="s-apply">Fill hours</button>
+      </div>
+      <div class="bar" id="s-bar" aria-hidden="true"></div>
+      <div class="split" id="s-split"></div>
+      <div class="legend"><span><i class="b0"></i>0500–1059 none</span><span><i class="b1"></i>1100–1659 +$2.12</span><span><i class="b2"></i>1700–0459 +$4.42</span></div>
+    </div>
+
+    <div class="fields">
+      <div class="field"><label for="h-reg">Regular hours</label><input type="number" id="h-reg" min="0" step="0.25" inputmode="decimal"></div>
+      <div class="field"><label for="h-ot">Overtime hours</label><input type="number" id="h-ot" min="0" step="0.25" inputmode="decimal"><span class="tag">× 1.5</span></div>
+      <div class="field"><label for="h-dt">Double time hours</label><input type="number" id="h-dt" min="0" step="0.25" inputmode="decimal"><span class="tag">× 2.0</span></div>
+      <div class="field"><label for="h-d1">Hours 1100–1659</label><input type="number" id="h-d1" min="0" step="0.25" inputmode="decimal"><span class="tag">+ $2.12/hr</span></div>
+      <div class="field"><label for="h-d2">Hours 1700–0459</label><input type="number" id="h-d2" min="0" step="0.25" inputmode="decimal"><span class="tag">+ $4.42/hr</span></div>
+    </div>
+    <label class="check" for="sme"><input type="checkbox" id="sme"><span><b>Trainer / SME</b> · adds a 7% premium to the hourly rate</span></label>
+    <p class="note">8 shifts × 10 hours = the 80-hour paycheck. "Fill hours" splits your shifts into the differential windows, keeps regular hours at 80, and sends anything over 80 to overtime. Adjust any box after.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-stub">
+    <h2 id="h-stub">Estimated gross <small>Biweekly</small></h2>
+    <div class="total">
+      <div class="big" id="gross">$0.00</div>
+      <div class="kpis">
+        <div class="kpi"><span>Annualized</span><b id="annual">$0</b></div>
+        <div class="kpi"><span>Total hours</span><b id="tot-h">0</b></div>
+        <div class="kpi"><span>Avg / hour</span><b id="avg">$0.00</b></div>
+      </div>
+    </div>
+    <div class="stub-scroll">
+      <table class="stub">
+        <thead><tr><th>Earning</th><th>Hours</th><th>Rate</th><th>Amount</th></tr></thead>
+        <tbody id="stub-body"></tbody>
+        <tfoot><tr><td>Gross</td><td id="f-h"></td><td></td><td id="f-amt"></td></tr></tfoot>
+      </table>
+    </div>
+    <p class="note">OT and double time are figured on the hourly rate (including the 7% premium when Trainer / SME is on). Shift differential is paid on every hour worked inside its window, including OT hours. <b>Gross estimate only, before taxes and deductions.</b> Not an official payroll statement.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const COLS=["DOS","DOS +12","DOS +24","DOS +36","DOS +48"];
+  const ROWS=["1","2","3","4","5","6","7+"];
+  const RATES=[
+    [39.82,41.01,42.24,43.51,44.82],
+    [42.87,44.16,45.48,46.84,48.25],
+    [44.88,46.23,47.62,49.05,50.52],
+    [47.74,49.17,50.65,52.17,53.74],
+    [50.03,51.53,53.08,54.67,56.31],
+    [51.31,52.85,54.44,56.07,57.75],
+    [53.96,55.58,57.25,58.97,60.74]];
+  const DIFF1=2.12, DIFF2=4.42, OT=1.5, DT=2.0, SME=0.07, SHIFT_LEN=600, PERIOD_HRS=80;
+  const KEY="fps-pay-v2";
+  const DEFAULTS={r:0,c:0,shift:"13:00",count:8,reg:80,ot:0,dt:0,d1:32,d2:48,sme:false};
+  let S=Object.assign({},DEFAULTS);
+  try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved)S=Object.assign(S,saved);}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+  const $=id=>document.getElementById(id);
+  const money=n=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const hrs=n=>(Math.round(n*100)/100).toLocaleString("en-US",{maximumFractionDigits:2});
+
+  // Rate grid
+  const tbl=$("rates");
+  function drawGrid(){
+    let h="<thead><tr><th class='row'>YOS</th>"+COLS.map(c=>"<th>"+c+"</th>").join("")+"</tr></thead><tbody>";
+    RATES.forEach((row,r)=>{
+      h+="<tr><th class='row'>"+ROWS[r]+"</th>";
+      row.forEach((v,c)=>{
+        const cls=(r===S.r&&c===S.c)?"on":((r===S.r||c===S.c)?"near":"");
+        h+="<td><button type='button' class='"+cls+"' data-r='"+r+"' data-c='"+c+"' aria-pressed='"+(cls==="on")+"' aria-label='YOS "+ROWS[r]+", "+COLS[c]+", $"+v.toFixed(2)+" per hour'>"+v.toFixed(2)+"</button></td>";
+      });
+      h+="</tr>";
+    });
+    tbl.innerHTML=h+"</tbody>";
+    $("rate-label").textContent="YOS "+ROWS[S.r]+" · "+COLS[S.c]+" · "+money(RATES[S.r][S.c])+"/hr";
+  }
+  tbl.addEventListener("click",e=>{const b=e.target.closest("button[data-r]");if(!b)return;S.r=+b.dataset.r;S.c=+b.dataset.c;drawGrid();calc();save();});
+
+  // Shift builder: minutes in each differential window
+  function toMin(t){const m=/^(\d{1,2}):(\d{2})/.exec(t||"");return m?(+m[1])*60+(+m[2]):null;}
+  function split(start){
+    const a=toMin(start);if(a===null)return null;
+    const out=[0,0,0];
+    for(let i=0;i<SHIFT_LEN;i++){const h=Math.floor(((a+i)%1440)/60);out[(h>=5&&h<11)?0:(h>=11&&h<17)?1:2]++;}
+    return out.map(m=>m/60);
+  }
+  function drawBuilder(){
+    const s=split(S.shift),n=Math.max(0,+S.count||0);
+    if(!s){$("s-split").textContent="Pick a shift.";$("s-bar").innerHTML="";return;}
+    const tot=s[0]+s[1]+s[2];
+    $("s-bar").innerHTML=s.map((v,i)=>"<span class='b"+i+"' style='width:"+(v/tot*100)+"%'></span>").join("");
+    $("s-split").textContent=hrs(tot)+" hr shift → "+hrs(s[0])+" none · "+hrs(s[1])+" day diff · "+hrs(s[2])+" night diff   ×"+n+" = "+hrs(tot*n)+" hrs";
+  }
+  $("s-apply").addEventListener("click",()=>{
+    const s=split(S.shift);if(!s)return;
+    const n=Math.max(0,+S.count||0),tot=(s[0]+s[1]+s[2])*n,cap=PERIOD_HRS;
+    S.d1=+(s[1]*n).toFixed(2);S.d2=+(s[2]*n).toFixed(2);
+    S.reg=+Math.min(tot,cap).toFixed(2);S.ot=+Math.max(0,tot-cap).toFixed(2);S.dt=0;
+    fillInputs();calc();save();
+  });
+
+  // Inputs
+  const MAP={"s-shift":"shift","s-count":"count","h-reg":"reg","h-ot":"ot","h-dt":"dt","h-d1":"d1","h-d2":"d2"};
+  function fillInputs(){for(const id in MAP)$(id).value=S[MAP[id]];$("sme").checked=!!S.sme;}
+  for(const id in MAP){const el=$(id);el.addEventListener(el.tagName==="SELECT"?"change":"input",e=>{const k=MAP[id];S[k]=(k==="shift")?e.target.value:(parseFloat(e.target.value)||0);if(k==="shift"||k==="count")drawBuilder();else calc();save();});}
+  $("sme").addEventListener("change",e=>{S.sme=e.target.checked;calc();save();});
+
+  function calc(){
+    const scale=RATES[S.r][S.c];
+    const base=S.sme?scale*(1+SME):scale;
+    const lines=[
+      ["Regular",S.reg,scale],
+      ["Overtime (1.5×)",S.ot,base*OT],
+      ["Double time (2.0×)",S.dt,base*DT],
+      ["Shift diff 1100–1659",S.d1,DIFF1],
+      ["Shift diff 1700–0459",S.d2,DIFF2]];
+    if(S.sme)lines.splice(1,0,["Trainer / SME premium (7%)",S.reg,scale*SME]);
+    let gross=0,body="";
+    lines.forEach(([name,h,rate])=>{const amt=(+h||0)*rate;gross+=amt;
+      body+="<tr class='"+(amt?"":"zero")+"'><td>"+name+"</td><td>"+hrs(+h||0)+"</td><td>"+money(rate)+"</td><td>"+money(amt)+"</td></tr>";});
+    const worked=(+S.reg||0)+(+S.ot||0)+(+S.dt||0);
+    $("stub-body").innerHTML=body;
+    $("gross").textContent=money(gross);
+    $("f-amt").textContent=money(gross);
+    $("f-h").textContent=hrs(worked);
+    $("tot-h").textContent=hrs(worked);
+    $("avg").textContent=worked?money(gross/worked):"$0.00";
+    $("annual").textContent="$"+Math.round(gross*26).toLocaleString("en-US");
+  }
+
+  $("reset").addEventListener("click",()=>{S=Object.assign({},DEFAULTS);try{localStorage.removeItem(KEY);}catch(e){}init();});
+  function init(){drawGrid();fillInputs();drawBuilder();calc();}
+  init();
+})();
+</script>
+
+</body>
+</html>
